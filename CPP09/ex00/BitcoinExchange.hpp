@@ -9,7 +9,6 @@
 #include <iomanip>
 #include <map>
 #include <string>
-#include <regex>
 
 
 class BitcoinExchange {
@@ -24,6 +23,8 @@ class BitcoinExchange {
 
         void LoadDatabase(const std::string &filename);
         void PrintDatabase();
+        bool isValidDate(const std::string &date) const;
+        bool isValidValue(const std::string &value_str) const;
 };
 
 #endif

@@ -12,6 +12,39 @@ BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &cpy) {
     return *this;
 }
 
+bool BitcoinExchange:: isValidDate(const std::string &date) const{
+
+    if (date.size() != 10 || date[4] != '-' || date[7] != '-') {
+            return false;
+        }
+
+        int year, month, day;
+        char dash1, dash2;
+        std::istringstream(date) >> year >> dash1 >> month >> dash2 >> day;
+
+        if (year < 1000 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31) {
+            return false;
+        }
+        return true;
+
+}
+
+
+bool BitcoinExchange::isValidValue(const std::string &value_str) const{
+        std::stringstream ss(value_str);
+        float value;
+        ss >> value;
+
+        // Eğer dönüştürme başarılı ise, değeri kontrol et
+        if (ss.fail()) {
+            return false;  // Değer geçerli bir sayıya dönüştürülemezse
+        }
+
+        // Pozitif bir değer olmalı ve 0 ile 10 arasında olmalı
+        return (value >= 0 && value <= 10);
+    }
+
+
 void BitcoinExchange:: LoadDatabase(const std::string &filename) {
         try {
             std::ifstream file(filename.c_str());
@@ -30,9 +63,13 @@ void BitcoinExchange:: LoadDatabase(const std::string &filename) {
                 if (std::getline(iss, key, ',') && std::getline(iss, value_str)) {
                     float value;
 
-                    std::regex date_regex("\\d{4}-\\d{2}-\\d{2}");
-                    if (!std::regex_match(key, date_regex)) {
+                    if (!isValidDate(key)) {
                         throw std::runtime_error("Error: invalid date format => " + key);
+                    }
+
+                    // Değeri kontrol et
+                    if (!isValidValue(value_str)) {
+                        throw std::runtime_error("Error: invalid value format or out of range => " + value_str);
                     }
                     // Değeri string'ten float'a çevir
                     std::stringstream(value_str) >> value;
