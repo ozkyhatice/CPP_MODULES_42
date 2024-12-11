@@ -24,7 +24,7 @@ std::vector<int> PmergeMe::merge(std::vector<int> &left, std::vector<int> &right
 
     size_t i=0, j = 0;
     while (i < left.size() && j < right.size()){
-        if (left[i] <= right[i])
+        if (left[i] <= right[j])
         {
             sorted.push_back(left[i]);
             i++;
@@ -48,6 +48,9 @@ std::vector<int> PmergeMe::merge(std::vector<int> &left, std::vector<int> &right
 
 std::vector<int> PmergeMe::mergeSort(std::vector<int> &vec)
 {
+    if (vec.size() <= 1) {
+        return vec;
+    }
     size_t l_size = vec.size() / 2;
     std::vector<int> left(vec.begin(), vec.begin() + l_size);
     std::vector<int> right(vec.begin() + l_size, vec.end());
@@ -57,8 +60,10 @@ std::vector<int> PmergeMe::mergeSort(std::vector<int> &vec)
     return merge(left, right);
 }
 
-void PmergeMe::printVector() const
-{
-    for(size_t i = 0; i < vector.size(); i++)
-        std::cout << vector[i] << " ";
-}
+// void PmergeMe::printVector() const
+// {
+//     for(size_t i = 0; i < vector.size(); i++)
+//         std::cout << vector[i] << " ";
+// }
+
+

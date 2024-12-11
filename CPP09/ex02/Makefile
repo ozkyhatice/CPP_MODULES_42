@@ -1,7 +1,7 @@
 NAME 	= PmergeMe
 CPP 	= @c++
 FLAGS	= -std=c++98 -Wall -Wextra -Werror
-SRCS 	= main.cpp RPN.cpp
+SRCS 	= main.cpp PmergeMe.cpp
 
 all: $(NAME)
 
