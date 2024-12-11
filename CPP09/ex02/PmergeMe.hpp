@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <iostream>
+#include <list>
+
 
 class PmergeMe{
 
@@ -16,9 +18,8 @@ class PmergeMe{
         ~PmergeMe();
         std::vector<int> mergeSort(std::vector<int> &vector);
         std::vector<int> merge(std::vector<int> &left, std::vector<int> &right);
-        // void printVector() const;
-        
-
+        std::list <int> mergeSortL(std::list<int> &list);
+        std::list<int> mergeL(std::list<int> &left, std::list<int> &right);
 
 };
 
