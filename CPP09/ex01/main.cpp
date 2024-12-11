@@ -8,4 +8,5 @@ int main(int argc,char **argv)
     }
     RPN rpn;
     rpn.pushToStack(argv[1]);
+    return 0;
 }
