@@ -1,165 +1,119 @@
 #include "BitcoinExchange.hpp"
 
-BitcoinExchange::BitcoinExchange(){
-    _min_year = 9999;
-
-}
-BitcoinExchange::~BitcoinExchange(){}
+BitcoinExchange::BitcoinExchange() { }
 
 BitcoinExchange::BitcoinExchange(const BitcoinExchange &cpy) {
-    _db = cpy._db;
+    this->_db = cpy._db;
+    this->min_year = cpy.min_year;
 }
-BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &cpy) {
-    if (this != &cpy)
-        _db = cpy._db;
+
+BitcoinExchange &BitcoinExchange::operator = (const BitcoinExchange &copy) {
+    (void)copy;
+    if (this != &copy) {
+        this->_db = copy._db;
+        this->min_year = copy.min_year;
+    }
     return *this;
 }
 
-bool BitcoinExchange:: isValidDate(const std::string &date) const{
+BitcoinExchange::~BitcoinExchange() { }
 
-    if (date.size() != 10 || date[4] != '-' || date[7] != '-') {
-            return false;
-        }
+int ft_stoi(std::string str) {
+    int i = 0;
+    int num = 0;
+    int isNegative = 0;
 
-        int year, month, day;
-        char dash1, dash2;
-        std::istringstream(date) >> year >> dash1 >> month >> dash2 >> day;
-
-        if (year < 1000 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31) {
-            return false;
-        }
-        return true;
-
+    if (str[i] == '-' || str[i] == '+')
+        if (str[i++] == '-')
+            isNegative = 1;
+    while (str[i] >= '0' && str[i] <= '9') {
+        num = num * 10 + (str[i++] - '0');
+    }
+    if (isNegative)
+        num *= -1;
+    return (num);
 }
 
-int BitcoinExchange::ft_stoi(const std::string &str) const {
-    int value = 0;
-    for (size_t i = 0; i < str.size(); ++i) {
-        value = value * 10 + (str[i] - '0');
-    }
-    return value;
-}
-
-bool BitcoinExchange::isValidValue(const std::string &value_str) const{
-        std::stringstream ss(value_str);
-        float value;
-        ss >> value;
-
-        // Eğer dönüştürme başarılı ise, değeri kontrol et
-        if (ss.fail()) {
-            return false;  // Değer geçerli bir sayıya dönüştürülemezse
-        }
-
-        // Pozitif bir değer olmalı ve 0 ile 10 arasında olmalı
-        return (value >= 0 && value <= 10);
-    }
-int BitcoinExchange::getMinYear()  {
-
-    // Veritabanında (map) her öğe üzerinde döngü yapıyoruz.
-    std::map<std::string, float>::const_iterator it = _db.begin();
-    while (it != _db.end()) {
-        // Yıl kısmını alıyoruz (anahtarın ilk 4 karakteri).
-        int year = ft_stoi(it->first.substr(0, 4)); // Anahtarın ilk 4 karakterini alıyoruz.
-        
-        // En küçük yılı buluyoruz.
-        if (_min_year > year)
-            _min_year = year;
-
-        ++it; // Bir sonraki öğeye geçiyoruz.
-    }
-
-    return _min_year; // En küçük yılı döndürüyoruz.
-}
-void BitcoinExchange::LoadDatabase(const std::string &file) {
+void BitcoinExchange::read_data() {
     try {
         std::ifstream file("data.csv");
-        if (!file.is_open()) {
-            throw std::runtime_error("Error: could not open file.");
-        }
 
+        if (!file.is_open())
+            throw std::runtime_error("Data file is not open!");
         std::string line;
-        std::getline(file, line); 
-        while (std::getline(file, line)) {
-
-
-
-            std::istringstream iss(line);
-            std::string key;
-            std::string value_str;
-
-            // Hem virgül (',') hem de pipe ('|') karakterini kontrol et
-            size_t delimiter_pos = line.find_first_of(",");
-
-            if (delimiter_pos != std::string::npos && delimiter_pos >= 10) {
-                key = line.substr(0, delimiter_pos); // İlk 10 karakteri al
-                value_str = line.substr(delimiter_pos + 1); // Geri kalan kısmı değer olarak al
-                float value;
-                std::stringstream(value_str) >> value;
-                _db[key] = value;
-            } else {
-                throw std::runtime_error("Error: bad input format => " + line);
-            }
-        file.close();
+        getline(file, line);
+        while (getline(file, line)) {
+            float val = atof((line.substr(11)).c_str());
+            _db[line.substr(0, 10)] = val;
         }
-    } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
+        file.close();
+    } catch (std::exception &e) {
+        std::cout << "Error: " << e.what() << std::endl;
     }
-    execInput(file);
+
+    min_year = 2024;
+    std::map<std::string, float>::iterator it = _db.begin();
+    while (it != _db.end()) {
+        if (min_year > ft_stoi(it->first.substr(0,4)))
+			min_year = ft_stoi(it->first.substr(0,4));
+        it++;
+    }
 }
 
-void BitcoinExchange::isValidLine(std::string line)
-{
-     try {
-        if (line.length() <= 11) {
-            throw std::invalid_argument("bad input");
+void BitcoinExchange::read_input(std::string file) {
+    try {
+        std::ifstream infile(file.c_str());
+
+        if (!infile.is_open())
+            throw std::runtime_error("Input file is not open!");
+        std::string line;
+        getline(infile, line);
+        while (getline(infile, line)) {
+            lineControl(line);
         }
-
-        float value = atof(line.substr(13).c_str());
-
-        int year = ft_stoi(line.substr(0, 4));
-        int month = ft_stoi(line.substr(5, 2));
-        int day = ft_stoi(line.substr(8, 2)); 
-
--        if (year < getMinYear() || year > 2022 || month < 1 || month > 12 || day < 1 || day > 31) {
-            throw std::invalid_argument("bad input");
-        }
-
-8        if (value < 0) {
-            throw std::out_of_range("not a positive number");
-        }
-
-        if (value > 1000) {
-            throw std::out_of_range("too large a number");
-        }
-        std::string date  = line.substr(0, 10);
-        std
-
-    } catch (const std::invalid_argument& e) {
-        std::cout << "Error: " << e.what() << " => " << line.substr(0, 10) << std::endl;
-    } catch (const std::out_of_range& e) {
+        infile.close();
+    } catch (std::exception &e) {
         std::cout << "Error: " << e.what() << std::endl;
     }
 }
 
-void BitcoinExchange::execInput(const std::string &file)
-{
-    try{
-        std::ifstream infile(file.c_str());
-        if (!infile.is_open())
-            throw std::runtime_error("Error: could not open file.");
-        std::string line;
-        getline(infile, line);
-        while (getline(infile, line))
-            isValidline(line);
-        infile.close();
-    }catch(std::exception &e)
-        std::cerr << e.what() << std::endl;
+void BitcoinExchange::lineControl(std::string line) {
+    if (line.length() <= 11)
+        std::cout << "Error: bad input => " << line << std::endl;
+    else
+    {
+        float val = atof((line.substr(13)).c_str());
 
+        int year = ft_stoi(line.substr(0, 4));
+        int month = ft_stoi(line.substr(5, 2));
+        int day = ft_stoi(line.substr(8, 10));
+
+        if (((year > 2024) || (year < min_year)) || ((month > 12) || (month < 1)) || ((day > 31) || (day < 1)))
+            std::cout << "Error: bad input => " << line.substr(0, 10) << std::endl;
+        else if (val < 0)
+            std::cout << "Error: not a positive number." << std::endl;
+        else if (val > 1000)
+            std::cout << "Error: too large a number." << std::endl;
+        else
+            isValidDate(line.substr(0, 10), val);
+    }
 }
+void BitcoinExchange::isValidDate(std::string date, float val) {
+    try{
+        std::map<std::string, float>::iterator it = _db.find(date);
+        if (it != _db.end()) {
+            std::cout << date << " => " << val << " = " << (it->second * val) << std::endl;
+            return;
+        }
+        it = _db.lower_bound(date);
+        if (it == _db.begin()) {
+            throw std::runtime_error("No data available for this date.");
+            return;
+        }
+        --it;
+        std::cout << date << " => " << val << " = " << (it->second * val) << std::endl;
 
-
-void BitcoinExchange::PrintDatabase() {
-    for (std::map<std::string, float>::iterator it = _db.begin(); it != _db.end(); ++it) {
-        std::cout << it->first << " " << it->second << std::endl;
+    }catch(std::exception &e){
+        std::cout << "Error: " << e.what() << std::endl;
     }
 }

@@ -1,5 +1,5 @@
 #ifndef RPN_HPP
-#define RPN_HP
+#define RPN_HPP
 
 #include <iostream>
 #include <stack>
